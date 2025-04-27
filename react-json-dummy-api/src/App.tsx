@@ -11,14 +11,9 @@ import { useEffect, useState } from 'react';
 import { InputText } from 'primereact/inputtext';
         
 const App: React.FC = () => {
-  const [users,setUsers]=useState({"users":{}})
+  const [users,setUsers]=useState({"users":[]})
   const [selectedUsers,setSelectedUsers]=useState<any>(null)
   useEffect(()=>{
-    async function handleFetch() {
-      const response=await fetch('https://dummyjson.com/users')
-      const data = await response.json()
-      setUsers(data)
-    }
     handleFetch()
 },[])
 
@@ -30,7 +25,12 @@ const handleSubmit=(event)=>{
   .then(res => res.json())
   .then(user=>setUsers(user));
 }
-
+const handleFetch=()=>{
+  fetch(`https://dummyjson.com/users`)
+  .then(res => res.json())
+  .then(user=>setUsers(user));
+  setSelectedUsers(null)
+}
 const handleFilter=(event)=>{
   event.preventDefault();
   const fd = new FormData(event.target);
@@ -40,15 +40,25 @@ const handleFilter=(event)=>{
 .then(res => res.json())
 .then(user=>setUsers(user));
 }
-const handleSelection=(event)=>{
-  
+const handleSelection=(event)=>{ 
   fetch(`https://dummyjson.com/users/${event.data.id}`)
   .then(res => res.json())
 .then((user)=>setSelectedUsers(user));}
+
+const handleDelete=(id)=>{ 
+  fetch(`https://dummyjson.com/users/${id}`, {
+    method: 'DELETE',
+  })
+   .then(res => res.json());
+   setUsers((prevUsers) => ({
+    users: prevUsers.users.filter((user: any) => user.id !== id),
+  }));
+  setSelectedUsers(null);
+}
   return (
     <>
     <div>
-      <Button label="Show all Users" onClick={()=>setSelectedUsers(null)} />
+      <Button label="Show all Users" onClick={handleFetch} />
           <h3>Search User </h3>
           <form onSubmit={handleSubmit}>
           <label>First name </label>
@@ -72,6 +82,13 @@ const handleSelection=(event)=>{
         <Column field="lastName" header="Last Name"></Column>
         <Column field="gender" header="Gender"></Column>
         <Column field="image" header="Image"></Column>
+        <Column header="Actions" body={(rowData) => (
+            <Button 
+                   icon="pi pi-trash" 
+                   className="p-button-danger" 
+                   onClick={() => handleDelete(rowData.id)} 
+                   />
+              )}/>
         </DataTable>
     </div>
     </>
