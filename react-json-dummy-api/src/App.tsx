@@ -9,10 +9,10 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { useEffect, useState } from 'react';
 import { InputText } from 'primereact/inputtext';
-import { InputNumber } from 'primereact/inputnumber';
         
 const App: React.FC = () => {
-  const [users,setUsers]=useState([])
+  const [users,setUsers]=useState({"users":{}})
+  const [selectedUsers,setSelectedUsers]=useState<any>(null)
   useEffect(()=>{
     async function handleFetch() {
       const response=await fetch('https://dummyjson.com/users')
@@ -21,6 +21,7 @@ const App: React.FC = () => {
     }
     handleFetch()
 },[])
+
 const handleSubmit=(event)=>{
   event.preventDefault();
   const fd = new FormData(event.target);
@@ -39,17 +40,15 @@ const handleFilter=(event)=>{
 .then(res => res.json())
 .then(user=>setUsers(user));
 }
-const handleDetail=(event)=>{
-  event.preventDefault();
-  const fd = new FormData(event.target);
-  const id = fd.get("userId")
-  fetch(`https://dummyjson.com/users/filter?key=id&value=${id}`)
-.then(res => res.json())
-.then(user=>setUsers(user));}
+const handleSelection=(event)=>{
+  
+  fetch(`https://dummyjson.com/users/${event.data.id}`)
+  .then(res => res.json())
+.then((user)=>setSelectedUsers(user));}
   return (
     <>
     <div>
-      <Button label="Search User" icon="pi pi-check" onClick={() => console.log('Clicked!')} />
+      <Button label="Show all Users" onClick={()=>setSelectedUsers(null)} />
           <h3>Search User </h3>
           <form onSubmit={handleSubmit}>
           <label>First name </label>
@@ -64,14 +63,8 @@ const handleDetail=(event)=>{
           <InputText placeholder='value' name='value'/>
           <Button label='Filter'/>
           </form>
-          <h3>Search details of user by ID </h3>
-          <form onSubmit={handleDetail}>
-          <label>ID </label>
-          <InputNumber placeholder='Write ID' name='userId'/>
-          <Button label='Detail'/><br/>
-          </form>
           <h3>List of Users </h3>
-        <DataTable value={users.users} tableStyle={{minWidth: "50rem"}}>
+        <DataTable value={selectedUsers?[selectedUsers]:users.users} tableStyle={{minWidth: "50rem"}} selectionMode="single" dataKey="id" onRowSelect={handleSelection}>
         <Column field="id" header="ID"></Column>
         <Column field="username" header="Username"></Column>
         <Column field="email" header="E-mail"></Column>
