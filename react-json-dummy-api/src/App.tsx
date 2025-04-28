@@ -123,10 +123,9 @@ const authUsers=()=>{
   }
 }
 
-const handleAddUser=(event)=>{
+const handleAddUser=(event: FormEvent)=>{
   event.preventDefault()
-  const fd=new FormData(event.target)
-  const id=fd.get("id")
+  const fd=new FormData(event.target as HTMLFormElement)
   const email=fd.get("email")
   const username=fd.get("username")
   const fname=fd.get("fname")
@@ -138,7 +137,6 @@ const handleAddUser=(event)=>{
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-          "id": `${id}`,
           "firstName": `${fname}`,
           "lastName": `${lname}`,
           "userName": `${username}`,
