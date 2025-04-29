@@ -79,9 +79,10 @@ const handleDelete=(id: string)=>{
 
 const authUsers=()=>{
   const token = localStorage.getItem('token');
+  console.log('Token:', token);
     if (!token) return;
 
-    fetch('https://dummyjson.com/auth/me', {
+    fetch('https://dummyjson.com/user/me', {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -94,17 +95,17 @@ const authUsers=()=>{
         }
         setSelectedUsers(user);
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error('Error fetching authenticated user:', error);
         alert('Failed to fetch authenticated user. Please login again.');
       });
 }
 
  async function handleLogin(){
-  const res=await fetch('https://dummyjson.com/auth/login', {
+  const res=await fetch('https://dummyjson.com/user/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      
       username: 'emilys',
       password: 'emilyspass',
       expiresInMins: 60, // optional, defaults to 60
@@ -115,7 +116,7 @@ const authUsers=()=>{
   console.log(data);
   if (res.ok) {
     console.log('Login successful:', data);
-    localStorage.setItem('token', data.token);
+    localStorage.setItem('token', data.accessToken);
     alert('Login Successful');
   } else {
     console.error('Login failed:', data);
@@ -198,7 +199,7 @@ const handleUpdateSubmit = (event) => {
     <>
     <div>
       <Button label="Login " onClick={handleLogin} /><br/>
-      <Button label="ADD User " onClick={()=>setShowAddUserForm(prevState => !prevState)} /><br/>
+      {!showAddUserForm && <><Button label="ADD User " onClick={()=>setShowAddUserForm(prevState => !prevState)} /><br/></>}
       {showAddUserForm && <form onSubmit={handleAddUser}>
         <label>E-mail</label>
         <InputText name='email'></InputText><br/>
@@ -262,7 +263,7 @@ const handleUpdateSubmit = (event) => {
       )}
 
           <h3>List of Users </h3>
-        <DataTable value={selectedUsers?[selectedUsers]:users.users} tableStyle={{minWidth: "50rem"}} selectionMode="single" dataKey="id" onRowSelect={handleSelection}>
+        <DataTable value={selectedUsers?[selectedUsers]:users.users} tableStyle={{minWidth: "50rem"}} selectionMode="single" onRowSelect={handleSelection}>
         <Column field="id" header="ID"></Column>
         <Column field="username" header="Username"></Column>
         <Column field="email" header="E-mail"></Column>
