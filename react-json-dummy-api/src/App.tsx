@@ -11,7 +11,8 @@ import { Column } from 'primereact/column';
 //import { useEffect, useState } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { InputNumber } from 'primereact/inputnumber';
-        
+import { fetchUsers } from "./sevices/userServices";
+
 interface User {
   id: string;
   username: string;
@@ -43,12 +44,22 @@ const handleSubmit=(event: FormEvent)=>{
   .then(user=>setUsers(user));
 }
 
-const handleFetch=()=>{
-  fetch(`https://dummyjson.com/users`)
-  .then(res => res.json())
-  .then(user=>setUsers(user));
-  setSelectedUsers(null)
-}
+// This function is triggered to fetch users and update component state
+const handleFetch = async () => {
+  try {
+    // Call the service function to get user data
+    const userData = await fetchUsers("/users");
+
+    // Update the state with the fetched users
+    setUsers(userData);
+
+    // Optionally reset the selected users state
+    setSelectedUsers(null);
+  } catch (error) {
+    // Handle any errors that occurred during the fetch
+    console.error('Error fetching users:', error);
+  }
+};
 
 const handleFilter=(event: FormEvent)=>{
   event.preventDefault();
